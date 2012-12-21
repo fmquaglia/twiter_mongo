@@ -1,17 +1,18 @@
 require 'rubygems'
-require 'mongo'
 require 'twitter'
-load 'config.rb'
 
-class TwiterMongo
+class TwitterMongo
   def initialize(tag)
     setup_twitter
+
     connection = Mongo::Connection.new
     db         = connection[DATABASE_NAME]
     @tweets    = db[COLLECTION_NAME]
+
     @tweets.create_index([['id', 1]], :unique => true)
     @tweets.create_index([['tags', 1], ['id', -1]])
-    @tag = tag
+
+    @tag          = tag
     @tweets_found = 0
   end
 

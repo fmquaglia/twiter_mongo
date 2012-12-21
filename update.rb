@@ -1,6 +1,6 @@
 load 'config.rb'
-load 'twiter_mongo.rb'
+load 'twitter_mongo.rb'
 TAGS.each do |tag|
-  archive = TwiterMongo.new(tag)
+  archive = TwitterMongo.new(tag)
   archive.update
 end
