@@ -1,21 +1,48 @@
 require "rubygems"
-require "mongo"
 
+require 'compass'
 require "sinatra"
+require 'haml'
+require 'sass'
 
-require_relative "config"
 
 configure do
-  db = Mongo::Connection.new[DATABASE_NAME]
-  TWEETS  = db[COLLECTION_NAME]
+  require_relative "config"
+  require           "mongo"
+  require_relative "twitter_mongo"
+
+  DATABASE  = Mongo::Connection.new[DATABASE_NAME]
+  TWEETS    = DATABASE[COLLECTION_NAME]
+
+  Compass.configuration do |config|
+    config.project_path = File.dirname(__FILE__)
+    config.sass_dir = 'views/stylesheets'
+  end
+
+  set :haml, { :format => :html5, :escape_html => true }
+  set :scss, {:style => :compact, :debug_info => false}
 end
 
 get '/' do
-  if params['tag']
-    selector = {:tags => params['tag']}
-  else
-    selector = {}
-  end
+  selector = params['tag'] ? {:tags => params['tag']} : {}
   @tweets = TWEETS.find(selector).sort(["id", -1])
-  erb :tweets
+  haml :tweets
+end
+
+get '/clean' do
+  DATABASE.drop_collection COLLECTION_NAME
+  redirect '/'
+end
+
+get '/update' do
+  TAGS.each do |tag|
+    archive = TwitterMongo.new(tag)
+    archive.update
+  end
+  redirect '/'
+end
+
+get '/stylesheets/:name.css' do
+  content_type 'text/css', :charset => 'utf-8'
+  scss(:"stylesheets/#{params[:name]}", Compass.sass_engine_options)
 end

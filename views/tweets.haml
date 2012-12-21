@@ -1,0 +1,19 @@
+!!! 5
+%html
+  %head
+    %meta{'http-equiv' => "Content-Type", :content => "text/html; charset=UTF-8"}/
+    %link{rel: 'stylesheet', type: 'text/css', href: '/stylesheets/screen.css'}/
+    %title Code Happening 2012
+  %body
+    %h1 Tweet Archive
+    - TAGS.each do |tag|
+      %a{href:"/?tag=#{tag}"}= tag
+    - @tweets.each do |tweet|
+      %h2= tweet['text']
+      %p
+        - unless tweet['user']['protected']
+          %a{href:"http://twitter.com/#{tweet['user']['screen_name']}"}= tweet['user']['screen_name']
+        on
+        = tweet['created_at']
+      - unless tweet['user']['protected']
+        %img{ src:"#{tweet['user']['profile_image_url']}", width:"48"}
